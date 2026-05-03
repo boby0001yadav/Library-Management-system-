@@ -1,55 +1,58 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>Library Management System</title>
+<title>LMS Dashboard</title>
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f4f6f9;
-}
-header {
-  background: #2c3e50;
-  color: white;
-  padding: 15px;
-  text-align: center;
-}
-.container {
-  padding: 20px;
-}
-.card {
-  background: white;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-input, select {
-  padding: 10px;
-  margin: 5px;
-}
-button {
-  padding: 10px;
-  border: none;
-  background: #27ae60;
-  color: white;
-  cursor: pointer;
-}
-.delete {
-  background: red;
-}
+body { margin:0; font-family:Arial; background:#ecf0f1;}
+nav { background:#2c3e50; color:white; padding:15px; display:flex; justify-content:space-between;}
+.container { padding:20px;}
+.card { background:white; padding:15px; margin:10px; border-radius:8px; display:inline-block; width:30%; text-align:center;}
+input, select { padding:10px; margin:5px;}
+button { padding:10px; background:#27ae60; color:white; border:none;}
+.delete { background:red;}
+.hidden { display:none;}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>📚 Library Management System</h1>
-</header>
+<!-- LOGIN -->
+<div id="login">
+  <h2 style="text-align:center;">Login</h2>
+  <div style="text-align:center;">
+    <input id="user" placeholder="Username"><br>
+    <input id="pass" type="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app" class="hidden">
+
+<nav>
+  <h3>LMS Dashboard</h3>
+  <button onclick="logout()">Logout</button>
+</nav>
 
 <div class="container">
 
+  <div class="card">
+    <h3 id="total"></h3>
+    <p>Total Books</p>
+  </div>
+
+  <div class="card">
+    <h3 id="available"></h3>
+    <p>Available</p>
+  </div>
+
+  <div class="card">
+    <h3 id="issued"></h3>
+    <p>Issued</p>
+  </div>
+
   <h3>Add Book</h3>
-  <input id="title" placeholder="Book Title">
+  <input id="title" placeholder="Title">
   <input id="author" placeholder="Author">
   <select id="status">
     <option>Available</option>
@@ -58,48 +61,70 @@ button {
   <button onclick="addBook()">Add</button>
 
   <h3>Search</h3>
-  <input id="search" placeholder="Search book..." onkeyup="display()">
+  <input id="search" placeholder="Search..." onkeyup="display()">
 
-  <h3>Books</h3>
   <div id="list"></div>
 
+</div>
 </div>
 
 <script>
 let books = JSON.parse(localStorage.getItem("books")) || [];
 
+function login(){
+  let u=document.getElementById("user").value;
+  let p=document.getElementById("pass").value;
+
+  if(u==="admin" && p==="123"){
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    updateStats();
+    display();
+  } else {
+    alert("Invalid Login (use admin / 123)");
+  }
+}
+
+function logout(){
+  location.reload();
+}
+
 function save(){
   localStorage.setItem("books", JSON.stringify(books));
 }
 
+function updateStats(){
+  document.getElementById("total").innerText = books.length;
+  document.getElementById("available").innerText = books.filter(b=>b.status==="Available").length;
+  document.getElementById("issued").innerText = books.filter(b=>b.status==="Issued").length;
+}
+
 function display(){
-  let list = document.getElementById("list");
-  let search = document.getElementById("search").value.toLowerCase();
+  let list=document.getElementById("list");
+  let search=document.getElementById("search").value.toLowerCase();
+  list.innerHTML="";
 
-  list.innerHTML = "";
-
-  books.filter(b => 
-    b.title.toLowerCase().includes(search) ||
-    b.author.toLowerCase().includes(search)
-  ).forEach((b,i)=>{
+  books.filter(b=>b.title.toLowerCase().includes(search) || b.author.toLowerCase().includes(search))
+  .forEach((b,i)=>{
     list.innerHTML += `
-      <div class="card">
+      <div style="background:white; padding:10px; margin:10px;">
         <b>${b.title}</b><br>
-        Author: ${b.author}<br>
-        Status: ${b.status}<br><br>
+        ${b.author}<br>
+        Status: ${b.status}<br>
         <button class="delete" onclick="del(${i})">Delete</button>
-      </div>
-    `;
+      </div>`;
   });
+
+  updateStats();
 }
 
 function addBook(){
-  let title = document.getElementById("title").value;
-  let author = document.getElementById("author").value;
-  let status = document.getElementById("status").value;
+  let t=document.getElementById("title").value;
+  let a=document.getElementById("author").value;
+  let s=document.getElementById("status").value;
 
-  if(title && author){
-    books.push({title, author, status});
+  if(t && a){
+    books.push({title:t, author:a, status:s});
     save();
     display();
   }
@@ -110,8 +135,6 @@ function del(i){
   save();
   display();
 }
-
-display();
 </script>
 
 </body>
