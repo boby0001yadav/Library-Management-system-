@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>LMS</title>
+</head>
+<body>
+
+<h1>📚 Library Management System</h1>
+
+<input id="title" placeholder="Book Title">
+<input id="author" placeholder="Author">
+<button onclick="addBook()">Add</button>
+
+<ul id="list"></ul>
+
+<script>
+let books = JSON.parse(localStorage.getItem("books")) || [];
+
+function save(){
+ localStorage.setItem("books", JSON.stringify(books));
+}
+
+function display(){
+ let list = document.getElementById("list");
+ list.innerHTML = "";
+ books.forEach((b,i)=>{
+  list.innerHTML += `<li>${b.title} - ${b.author} <button onclick="del(${i})">❌</button></li>`;
+ });
+}
+
+function addBook(){
+ let t = document.getElementById("title").value;
+ let a = document.getElementById("author").value;
+ if(t && a){
+  books.push({title:t, author:a});
+  save();
+  display();
+ }
+}
+
+function del(i){
+ books.splice(i,1);
+ save();
+ display();
+}
+
+display();
+</script>
+
+</body>
+</html>
