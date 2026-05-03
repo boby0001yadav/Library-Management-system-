@@ -1,47 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>LMS</title>
+<title>Library Management System</title>
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f4f6f9;
+}
+header {
+  background: #2c3e50;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+.container {
+  padding: 20px;
+}
+.card {
+  background: white;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+input, select {
+  padding: 10px;
+  margin: 5px;
+}
+button {
+  padding: 10px;
+  border: none;
+  background: #27ae60;
+  color: white;
+  cursor: pointer;
+}
+.delete {
+  background: red;
+}
+</style>
 </head>
 <body>
 
-<h1>📚 Library Management System</h1>
+<header>
+  <h1>📚 Library Management System</h1>
+</header>
 
-<input id="title" placeholder="Book Title">
-<input id="author" placeholder="Author">
-<button onclick="addBook()">Add</button>
+<div class="container">
 
-<ul id="list"></ul>
+  <h3>Add Book</h3>
+  <input id="title" placeholder="Book Title">
+  <input id="author" placeholder="Author">
+  <select id="status">
+    <option>Available</option>
+    <option>Issued</option>
+  </select>
+  <button onclick="addBook()">Add</button>
+
+  <h3>Search</h3>
+  <input id="search" placeholder="Search book..." onkeyup="display()">
+
+  <h3>Books</h3>
+  <div id="list"></div>
+
+</div>
 
 <script>
 let books = JSON.parse(localStorage.getItem("books")) || [];
 
 function save(){
- localStorage.setItem("books", JSON.stringify(books));
+  localStorage.setItem("books", JSON.stringify(books));
 }
 
 function display(){
- let list = document.getElementById("list");
- list.innerHTML = "";
- books.forEach((b,i)=>{
-  list.innerHTML += `<li>${b.title} - ${b.author} <button onclick="del(${i})">❌</button></li>`;
- });
+  let list = document.getElementById("list");
+  let search = document.getElementById("search").value.toLowerCase();
+
+  list.innerHTML = "";
+
+  books.filter(b => 
+    b.title.toLowerCase().includes(search) ||
+    b.author.toLowerCase().includes(search)
+  ).forEach((b,i)=>{
+    list.innerHTML += `
+      <div class="card">
+        <b>${b.title}</b><br>
+        Author: ${b.author}<br>
+        Status: ${b.status}<br><br>
+        <button class="delete" onclick="del(${i})">Delete</button>
+      </div>
+    `;
+  });
 }
 
 function addBook(){
- let t = document.getElementById("title").value;
- let a = document.getElementById("author").value;
- if(t && a){
-  books.push({title:t, author:a});
-  save();
-  display();
- }
+  let title = document.getElementById("title").value;
+  let author = document.getElementById("author").value;
+  let status = document.getElementById("status").value;
+
+  if(title && author){
+    books.push({title, author, status});
+    save();
+    display();
+  }
 }
 
 function del(i){
- books.splice(i,1);
- save();
- display();
+  books.splice(i,1);
+  save();
+  display();
 }
 
 display();
